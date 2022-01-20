@@ -3,7 +3,7 @@ import requests
 import json
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import emoji
-
+import datetime
 from iconsdk.builder.call_builder import CallBuilder
 from iconsdk.icon_service import IconService
 from iconsdk.providers.http_provider import HTTPProvider
@@ -21,9 +21,34 @@ logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(na
 
 logger = logging.getLogger(__name__)
 
-count = 12432
+count = 20865
 
 #Baln Price command#
+
+def finprice(update,context):
+
+    finbnusdpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(DEX_CONTRACT)\
+                    .method("getPrice")\
+                    .params({"_id": "31"})\
+                    .build()
+    finbnusdpriceresult = nid.call(finbnusdpricecall)
+
+    finbnusdindec = int(finbnusdpriceresult, 16)
+        #convert to icx
+    finbnusdfloatindec = float(finbnusdindec)
+    finbnusdconverted = finbnusdfloatindec / EXA
+        #make it 3 decimals
+    finbnusdprice = str("%.4f" % finbnusdconverted)
+    finpricetext = "FIN Price: " + finbnusdprice + " bnUSD"
+    update.message.reply_text(finpricetext)
+    global count
+    count = count + 1
+    logger.info(f'{count} amount of interactions ')
+
+
+
+
 
 
 def gbetprice(update,context):
@@ -380,6 +405,10 @@ def fullinfo(update, context):
     logger.info(f'{count} amount of interactions ')
 
 
+
+    
+
+
 def info(update, context):
     update.message.reply_text('This bot is created by @Sazern and uses Brian li´s api https://balanced.rhizome.dev/docs#/ to fetch data from the balanced protocol')
     #logging interaction#
@@ -408,7 +437,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-updater = Updater("INSERT TG KEY HERE", use_context=True)
+updater = Updater("INSERT_TG_TOKEN_HERE", use_context=True)
     # Get the dispatcher to register handlers
 dp = updater.dispatcher
 
@@ -417,9 +446,12 @@ dp.add_handler(CommandHandler("balnprice", balnprice))
 dp.add_handler(CommandHandler("ommprice", ommprice))
 dp.add_handler(CommandHandler("cftprice", cftprice))
 dp.add_handler(CommandHandler("gbetprice", gbetprice))
+dp.add_handler(CommandHandler("finprice", finprice))
 dp.add_handler(CommandHandler("info", info))
 dp.add_handler(CommandHandler("fullinfo", fullinfo))
 dp.add_handler(CommandHandler("counter", counter))
+
+
 
 
 
