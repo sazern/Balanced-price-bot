@@ -21,7 +21,7 @@ logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(na
 
 logger = logging.getLogger(__name__)
 
-count = 20865
+count = 28280
 
 #Baln Price command#
 
@@ -45,9 +45,6 @@ def finprice(update,context):
     global count
     count = count + 1
     logger.info(f'{count} amount of interactions ')
-
-
-
 
 
 
@@ -88,7 +85,25 @@ def cftprice(update,context):
     cftsicxfloatindec = float(cftsicxindec)
     cftsicxconverted = cftsicxfloatindec / EXA
     cftsicxprice = str("%.4f" % cftsicxconverted)
-    cftpricetext = "CFT Price: " + cftsicxprice + " sICX"
+
+    sicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(DEX_CONTRACT)\
+                    .method("getPriceByName")\
+                    .params({"_name": "sICX/bnUSD"})\
+                    .build()
+    sicxpriceresult = nid.call(sicxpricecall)
+
+    sicxindec = int(sicxpriceresult, 16)
+        #convert to icx
+    sicxfloatindec = float(sicxindec)
+    sicxconverted = sicxfloatindec / EXA
+        #make it 3 decimals
+    sicxprice = str("%.4f" % sicxconverted)
+
+    cftbnusd = sicxconverted * cftsicxconverted
+    cftbnusdprice = str("%.4f" % cftbnusd)
+
+    cftpricetext = "CFT/sICX Price: " + cftsicxprice + " sICX" + "\n" + "CFT/bnUSD Price: " + cftbnusdprice + " bnUSD"
     update.message.reply_text(cftpricetext)
     global count
     count = count + 1
@@ -148,8 +163,6 @@ def ommprice(update, context):
     global count
     count = count + 1
     logger.info(f'{count} amount of interactions ')
-
-
 
 
 
@@ -437,7 +450,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-updater = Updater("INSERT_TG_TOKEN_HERE", use_context=True)
+updater = Updater("INSERT_TG_TOKEN", use_context=True)
     # Get the dispatcher to register handlers
 dp = updater.dispatcher
 
