@@ -26,6 +26,15 @@ count = 28280
 #Baln Price command#
 
 def finprice(update,context):
+    fin_contract = "cx785d504f44b5d2c8dac04c5a1ecd75f18ee57d16"
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(fin_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
 
     finbnusdpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
                     .to(DEX_CONTRACT)\
@@ -40,7 +49,12 @@ def finprice(update,context):
     finbnusdconverted = finbnusdfloatindec / EXA
         #make it 3 decimals
     finbnusdprice = str("%.4f" % finbnusdconverted)
-    finpricetext = "FIN Price: " + finbnusdprice + " bnUSD"
+
+    marketcap = finbnusdconverted * totalsupply
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
+
+    finpricetext = "Market Cap: $" + convmarketcap + "\n" + "\n" + "FIN Price: " + finbnusdprice + " bnUSD"
     update.message.reply_text(finpricetext)
     global count
     count = count + 1
@@ -49,6 +63,15 @@ def finprice(update,context):
 
 
 def gbetprice(update,context):
+    gbet_contract = "cx6139a27c15f1653471ffba0b4b88dc15de7e3267"
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(gbet_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
 
     gbetbnusdpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
                     .to(DEX_CONTRACT)\
@@ -63,7 +86,18 @@ def gbetprice(update,context):
     gbetbnusdconverted = gbetbnusdfloatindec / EXA
         #make it 3 decimals
     gbetbnusdprice = str("%.4f" % gbetbnusdconverted)
-    gbetpricetext = "Gbet Price: " + gbetbnusdprice + " bnUSD"
+    
+    marketcap = gbetbnusdconverted * totalsupply
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
+
+    fdts = 144735525
+
+    fdmc = gbetbnusdconverted * fdts
+    intfdmc = int(fdmc)
+    convfdmc = (f"{intfdmc:,}")
+
+    gbetpricetext = "Market Cap: $" + convmarketcap + "\n" + "Fully Diluted Market Cap: $" + convfdmc + "\n" "\n" "Gbet Price: " + gbetbnusdprice + " bnUSD"
     update.message.reply_text(gbetpricetext)
     global count
     count = count + 1
@@ -103,7 +137,34 @@ def cftprice(update,context):
     cftbnusd = sicxconverted * cftsicxconverted
     cftbnusdprice = str("%.4f" % cftbnusd)
 
-    cftpricetext = "CFT/sICX Price: " + cftsicxprice + " sICX" + "\n" + "CFT/bnUSD Price: " + cftbnusdprice + " bnUSD"
+    cft_contract = "cx2e6d0fc0eca04965d06038c8406093337f085fcf"
+
+
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(cft_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
+    marketcap = cftbnusd * totalsupply
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
+
+    fdts = 210000000
+
+    fdmc = cftbnusd * fdts
+    intfdmc = int(fdmc)
+    convfdmc = (f"{intfdmc:,}")
+
+
+
+
+
+
+
+    cftpricetext ="Market cap: $" + convmarketcap + "$" "\n" + "Fully Diluted Market Cap: $" + convfdmc + "\n" + "\n" + "CFT/sICX Price: " + cftsicxprice + " sICX" + "\n" + "CFT/bnUSD Price: " + cftbnusdprice + " bnUSD"
     update.message.reply_text(cftpricetext)
     global count
     count = count + 1
@@ -112,6 +173,16 @@ def cftprice(update,context):
 
 
 def ommprice(update, context):
+    omm_contract = "cx1a29259a59f463a67bb2ef84398b30ca56b5830a"
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(omm_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
+
     ommusdspricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
                     .to(DEX_CONTRACT)\
                     .method("getPriceByName")\
@@ -153,10 +224,14 @@ def ommprice(update, context):
     sicxinttofloat = float(sicxhextodec)
     sicxconverted = sicxinttofloat / EXA
     ommsicxprice = str("%.3f" % sicxconverted)
+
+    marketcap = ommusdsconverted * totalsupply
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
     
 
     
-    ommprice = str("Omm Price: " + "\n" + "%.3f" % ommusdsconverted + " USDS" + "\n" + ommusdcprice + " IUSDC" + "\n" + ommsicxprice + " sICX")
+    ommprice = str("Market cap: $" + convmarketcap + "\n" + "\n" + "Omm Price: " + "\n" + "%.3f" % ommusdsconverted + " USDS" + "\n" + ommusdcprice + " IUSDC" + "\n" + ommsicxprice + " sICX")
     update.message.reply_text(ommprice)
         #logging interaction#
     logger.info('Omm price Command sent')
@@ -167,14 +242,19 @@ def ommprice(update, context):
 
 
 def balnprice(update, context):
-    #price_api = requests.get('https://balanced.rhizome.dev/api/v2/dex/quote/')
-    #pricedata = price_api.text
-    #price_json = json.loads(pricedata)
-    #balnprice = price_json['baln_bnusd_quote']
-    #floatbalnprice = float(balnprice)
-    #balnicxprice = price_json['baln_sicx_quote']
-    #floatbalnicxprice = float(balnicxprice)
-    #balnpriceresult = "BALN Price: " + "%.2f" % floatbalnprice + " bnUSD / " + "%.2f" % floatbalnicxprice + " ICX"
+
+    baln_contract = "cxf61cd5a45dc9f91c15aa65831a30a90d59a09619"
+
+
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(baln_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
+    
     balnbnusdpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
                     .to(DEX_CONTRACT)\
                     .method("getPriceByName")\
@@ -201,10 +281,13 @@ def balnprice(update, context):
     balnsicxfloat = float(balnsicxhextodec)
     balnsicxconv = balnsicxfloat / EXA
     balnsicxresult = str("%.3f" % balnsicxconv)
+    marketcap = balnbnusdconv * totalsupply
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
 
 
 
-    update.message.reply_text("Baln Prices: " + "\n" + balnbnusdresult + " bnUSD" + "\n" + balnsicxresult + " sICX")
+    update.message.reply_text("Market Cap: $" + convmarketcap + "\n" + "\n" + "Baln Prices: " + "\n" + balnbnusdresult + " bnUSD" + "\n" + balnsicxresult + " sICX")
     #logging interaction#
     logger.info('Balnprice Command sent')
     global count
