@@ -21,9 +21,61 @@ logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(na
 
 logger = logging.getLogger(__name__)
 
-count = 29077
+count = 47491
 
 #Baln Price command#
+
+def clawprice(update,context):
+    clawsicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(DEX_CONTRACT)\
+                    .method("getPrice")\
+                    .params({"_id": "45"})\
+                    .build()
+    clawsicxpriceresult = nid.call(clawsicxpricecall)
+    clawsicxindec = int(clawsicxpriceresult, 16)
+    clawsicxconverted = clawsicxindec / EXA
+    clawsicxprice = str("%.7f" % clawsicxconverted)
+    
+
+    sicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(DEX_CONTRACT)\
+                    .method("getPriceByName")\
+                    .params({"_name": "sICX/bnUSD"})\
+                    .build()
+    sicxpriceresult = nid.call(sicxpricecall)
+
+    sicxindec = int(sicxpriceresult, 16)
+        #convert to icx
+    sicxfloatindec = float(sicxindec)
+    sicxconverted = sicxfloatindec / EXA
+        #make it 3 decimals
+    sicxprice = str("%.4f" % sicxconverted)
+
+    clawbnusd = sicxconverted * clawsicxconverted
+    clawbnusdprice = str("%.7f" % clawbnusd)
+    
+    claw_contract = "cx13b52d9f24db8d64d93a31926e3c69d44fbe8f9a"
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(claw_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
+
+    marketcap = clawbnusd * totalsupply
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
+
+    
+    clawpricetext ="Market cap: $" + convmarketcap + "\n" + "\n" +  "Claw Price: " + "\n" + clawsicxprice + " sICX" + "\n" + clawbnusdprice + " bnUSD"
+    update.message.reply_text(clawpricetext)
+    global count
+    count = count + 1
+    logger.info(f'{count} amount of interactions ')
+
+
 
 def metxprice(update,context):
     statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
@@ -605,7 +657,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-updater = Updater("INSERT_TG_TOKEN", use_context=True)
+updater = Updater("1708035543:AAFLgcnN57hZHfeSFxs1W0nyYbuPrh39jnc", use_context=True)
     # Get the dispatcher to register handlers
 dp = updater.dispatcher
 
@@ -616,6 +668,7 @@ dp.add_handler(CommandHandler("cftprice", cftprice))
 dp.add_handler(CommandHandler("gbetprice", gbetprice))
 dp.add_handler(CommandHandler("finprice", finprice))
 dp.add_handler(CommandHandler("metxprice", metxprice))
+dp.add_handler(CommandHandler("clawprice", clawprice))
 dp.add_handler(CommandHandler("info", info))
 dp.add_handler(CommandHandler("fullinfo", fullinfo))
 dp.add_handler(CommandHandler("counter", counter))
