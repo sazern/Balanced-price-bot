@@ -21,9 +21,57 @@ logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(na
 
 logger = logging.getLogger(__name__)
 
-count = 47491
+count = 51293
 
 #Baln Price command#
+
+def frmdprice(update,context):
+    frmdsicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(DEX_CONTRACT)\
+                    .method("getPrice")\
+                    .params({"_id": "48"})\
+                    .build()
+    frmdsicxpriceresult = nid.call(frmdsicxpricecall)
+    frmdsicxindec = int(frmdsicxpriceresult, 16)
+    frmdsicxconverted = frmdsicxindec / EXA
+    frmdsicxprice = str("%.6f" % frmdsicxconverted)
+
+    sicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(DEX_CONTRACT)\
+                    .method("getPriceByName")\
+                    .params({"_name": "sICX/bnUSD"})\
+                    .build()
+    sicxpriceresult = nid.call(sicxpricecall)
+    sicxindec = int(sicxpriceresult, 16)
+        #convert to icx
+    sicxfloatindec = float(sicxindec)
+    sicxconverted = sicxfloatindec / EXA
+        #make it 3 decimals
+    sicxprice = str("%.4f" % sicxconverted)
+
+    #clawbnusd = sicxconverted * clawsicxconverted
+    frmdbnusd = sicxconverted * frmdsicxconverted
+    frmdbnusdprice = str("%4f" % frmdbnusd)
+   
+    frmd_contract = "cx2aa9b28a657e3121b75d3d4fe65e569398645d56"
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(frmd_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
+
+    marketcap = (float(frmdbnusdprice) * totalsupply)
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
+    
+    frmdtext = "Market cap: $" + convmarketcap + "\n" + "\n" +  "Frmd Price: " + "\n" + frmdsicxprice + " sICX"  + "\n" + frmdbnusdprice + " bnUSD"
+    update.message.reply_text(frmdtext)
+    global count
+    count = count + 1
+    logger.info(f'{count} amount of interactions ')
 
 def clawprice(update,context):
     clawsicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
@@ -657,7 +705,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-updater = Updater("TG TOKEN", use_context=True)
+updater = Updater("INSERT_TG_TOKEN", use_context=True)
     # Get the dispatcher to register handlers
 dp = updater.dispatcher
 
@@ -669,6 +717,7 @@ dp.add_handler(CommandHandler("gbetprice", gbetprice))
 dp.add_handler(CommandHandler("finprice", finprice))
 dp.add_handler(CommandHandler("metxprice", metxprice))
 dp.add_handler(CommandHandler("clawprice", clawprice))
+dp.add_handler(CommandHandler("frmdprice", frmdprice))
 dp.add_handler(CommandHandler("info", info))
 dp.add_handler(CommandHandler("fullinfo", fullinfo))
 dp.add_handler(CommandHandler("counter", counter))
@@ -692,3 +741,4 @@ updater.idle()
 
 if __name__ == '__main__':
     main()
+
