@@ -15,43 +15,59 @@ EXA = 10**18
 USDCEXA = 10**6
 
 
+
 # Enable logging
 logging.basicConfig(filename='app.log', filemode='w', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-count = 51293
+count = 61654
+print y
+(count)
 
 #Baln Price command#
-
-def frmdprice(update,context):
-    frmdsicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+def crownprice(update,context):
+    crownbnusdpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
                     .to(DEX_CONTRACT)\
                     .method("getPrice")\
-                    .params({"_id": "48"})\
+                    .params({"_id": "50"})\
                     .build()
-    frmdsicxpriceresult = nid.call(frmdsicxpricecall)
-    frmdsicxindec = int(frmdsicxpriceresult, 16)
-    frmdsicxconverted = frmdsicxindec / EXA
-    frmdsicxprice = str("%.6f" % frmdsicxconverted)
+    crownbnusdpriceresult = nid.call(crownbnusdpricecall)
+    crownbnusdindec = int(crownbnusdpriceresult, 16)
+    crownbnusdconverted = crownbnusdindec / EXA
+    crownbnusdprice = str("%.6f" % crownbnusdconverted)
+    
+    crown_contract = "cx28b2ec885b50c8a93da752f2d0467a67127a70e8"
+    totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+                    .to(crown_contract)\
+                    .method("totalSupply")\
+                    .params({})\
+                    .build()
+    totalsupplyhex = nid.call(totalsupplycall)
+    totalsupplydec = int(totalsupplyhex, 16)
+    totalsupply = totalsupplydec / EXA
 
-    sicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
+    marketcap = (float(crownbnusdprice) * totalsupply)
+    intmarketcap = int(marketcap)
+    convmarketcap = (f"{intmarketcap:,}")
+    crowntext = "Market cap: $" + convmarketcap + "\n" + "\n" +  "Crown Price: " + "\n" + crownbnusdprice + " bnusd"
+    update.message.reply_text(crowntext)
+    global count
+    count = count + 1
+    logger.info(f'{count} amount of interactions ')
+
+
+def frmdprice(update,context):
+    frmdbnusdpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
                     .to(DEX_CONTRACT)\
-                    .method("getPriceByName")\
-                    .params({"_name": "sICX/bnUSD"})\
+                    .method("getPrice")\
+                    .params({"_id": "49"})\
                     .build()
-    sicxpriceresult = nid.call(sicxpricecall)
-    sicxindec = int(sicxpriceresult, 16)
-        #convert to icx
-    sicxfloatindec = float(sicxindec)
-    sicxconverted = sicxfloatindec / EXA
-        #make it 3 decimals
-    sicxprice = str("%.4f" % sicxconverted)
-
-    #clawbnusd = sicxconverted * clawsicxconverted
-    frmdbnusd = sicxconverted * frmdsicxconverted
-    frmdbnusdprice = str("%4f" % frmdbnusd)
+    frmdbnusdpriceresult = nid.call(frmdbnusdpricecall)
+    frmdbnusdindec = int(frmdbnusdpriceresult, 16)
+    frmdbnusdconverted = frmdbnusdindec / EXA
+    frmdbnusdprice = str("%.6f" % frmdbnusdconverted)
    
     frmd_contract = "cx2aa9b28a657e3121b75d3d4fe65e569398645d56"
     totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
@@ -67,7 +83,7 @@ def frmdprice(update,context):
     intmarketcap = int(marketcap)
     convmarketcap = (f"{intmarketcap:,}")
     
-    frmdtext = "Market cap: $" + convmarketcap + "\n" + "\n" +  "Frmd Price: " + "\n" + frmdsicxprice + " sICX"  + "\n" + frmdbnusdprice + " bnUSD"
+    frmdtext = "Market cap: $" + convmarketcap + "\n" + "\n" +  "Frmd Price: " + "\n" + frmdbnusdprice + " bnusd"
     update.message.reply_text(frmdtext)
     global count
     count = count + 1
@@ -126,11 +142,11 @@ def clawprice(update,context):
 
 
 def metxprice(update,context):
-    statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
-    statsdict = statsapi.json()
-    pricechange = statsdict["tokens"]["METX"]["price_change"]
-    convpricechange = str("%.4f" % pricechange)
-    textpricechange = "24h change: " + convpricechange + " %"
+    #statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
+    #statsdict = statsapi.json()
+    #pricechange = statsdict["tokens"]["METX"]["price_change"]
+    #convpricechange = str("%.4f" % pricechange)
+    #textpricechange = "24h change: " + convpricechange + " %"
     
     metx_contract = "cx369a5f4ce4f4648dfc96ba0c8229be0693b4eca2"
 
@@ -161,18 +177,18 @@ def metxprice(update,context):
     intmarketcap = int(marketcap)
     convmarketcap = (f"{intmarketcap:,}")
 
-    metxpricetext ="Market cap: $" + convmarketcap + "\n" + "\n" + "Metx Price: " + metxbnusdresult + " bnUSD" + "\n" "\n" + textpricechange
+    metxpricetext ="Market cap: $" + convmarketcap + "\n" + "\n" + "Metx Price: " + metxbnusdresult + " bnUSD" + "\n" "\n" #+ textpricechange
     update.message.reply_text(metxpricetext)
     global count
     count = count + 1
     logger.info(f'{count} amount of interactions ')
 
 def finprice(update,context):
-    statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
-    statsdict = statsapi.json()
-    pricechange = statsdict["tokens"]["FIN"]["price_change"]
-    convpricechange = str("%.4f" % pricechange)
-    textpricechange = "24h change: " + convpricechange + " %"
+    #statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
+    #statsdict = statsapi.json()
+    #pricechange = statsdict["tokens"]["FIN"]["price_change"]
+    #convpricechange = str("%.4f" % pricechange)
+    #textpricechange = "24h change: " + convpricechange + " %"
 
     fin_contract = "cx785d504f44b5d2c8dac04c5a1ecd75f18ee57d16"
     totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
@@ -202,7 +218,7 @@ def finprice(update,context):
     intmarketcap = int(marketcap)
     convmarketcap = (f"{intmarketcap:,}")
 
-    finpricetext = "Market Cap: $" + convmarketcap + "\n" + "\n" + "FIN Price: " + finbnusdprice + " bnUSD" + "\n" + "\n" + textpricechange
+    finpricetext = "Market Cap: $" + convmarketcap + "\n" + "\n" + "FIN Price: " + finbnusdprice + " bnUSD" + "\n" + "\n" #+ textpricechange
     update.message.reply_text(finpricetext)
     global count
     count = count + 1
@@ -211,11 +227,11 @@ def finprice(update,context):
 
 
 def gbetprice(update,context):
-    statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
-    statsdict = statsapi.json()
-    pricechange = statsdict["tokens"]["GBET"]["price_change"]
-    convpricechange = str("%.4f" % pricechange)
-    textpricechange = "24h change: " + convpricechange + " %"
+    #statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
+    #statsdict = statsapi.json()
+    #pricechange = statsdict["tokens"]["GBET"]["price_change"]
+    #convpricechange = str("%.4f" % pricechange)
+    #textpricechange = "24h change: " + convpricechange + " %"
 
     gbet_contract = "cx6139a27c15f1653471ffba0b4b88dc15de7e3267"
     totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
@@ -251,7 +267,7 @@ def gbetprice(update,context):
     intfdmc = int(fdmc)
     convfdmc = (f"{intfdmc:,}")
 
-    gbetpricetext = "Market Cap: $" + convmarketcap + "\n" + "Fully Diluted Market Cap: $" + convfdmc + "\n" "\n" "Gbet Price: " + gbetbnusdprice + " bnUSD" + "\n" "\n" + textpricechange
+    gbetpricetext = "Market Cap: $" + convmarketcap + "\n" + "Fully Diluted Market Cap: $" + convfdmc + "\n" "\n" "Gbet Price: " + gbetbnusdprice + " bnUSD" + "\n" "\n" #+ textpricechange
     update.message.reply_text(gbetpricetext)
     global count
     count = count + 1
@@ -260,11 +276,11 @@ def gbetprice(update,context):
 
 
 def cftprice(update,context):
-    statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
-    statsdict = statsapi.json()
-    pricechange = statsdict["tokens"]["CFT"]["price_change"]
-    convpricechange = str("%.4f" % pricechange)
-    textpricechange = "24h change: " + convpricechange + " %"
+    #statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
+    #statsdict = statsapi.json()
+    #pricechange = statsdict["tokens"]["CFT"]["price_change"]
+    #convpricechange = str("%.4f" % pricechange)
+    #textpricechange = "24h change: " + convpricechange + " %"
 
     cftsicxpricecall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
                     .to(DEX_CONTRACT)\
@@ -323,7 +339,7 @@ def cftprice(update,context):
 
 
 
-    cftpricetext ="Market cap: $" + convmarketcap + "$" "\n" + "Fully Diluted Market Cap: $" + convfdmc + "\n" + "\n" + "CFT/sICX Price: " + cftsicxprice + " sICX" + "\n" + "CFT/bnUSD Price: " + cftbnusdprice + " bnUSD" + "\n" "\n" + textpricechange
+    cftpricetext ="Market cap: $" + convmarketcap + "$" "\n" + "Fully Diluted Market Cap: $" + convfdmc + "\n" + "\n" + "CFT/sICX Price: " + cftsicxprice + " sICX" + "\n" + "CFT/bnUSD Price: " + cftbnusdprice + " bnUSD" + "\n" "\n"# + textpricechange
     update.message.reply_text(cftpricetext)
     global count
     count = count + 1
@@ -333,11 +349,11 @@ def cftprice(update,context):
 
 def ommprice(update, context):
 
-    statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
-    statsdict = statsapi.json()
-    pricechange = statsdict["tokens"]["OMM"]["price_change"]
-    convpricechange = str("%.4f" % pricechange)
-    textpricechange = "24h change: " + convpricechange + " %"
+    #statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
+    #statsdict = statsapi.json()
+    #pricechange = statsdict["tokens"]["OMM"]["price_change"]
+    #convpricechange = str("%.4f" % pricechange)
+    #textpricechange = "24h change: " + convpricechange + " %"
 
     omm_contract = "cx1a29259a59f463a67bb2ef84398b30ca56b5830a"
     totalsupplycall = CallBuilder().from_("hx0000000000000000000000000000000000000001")\
@@ -397,7 +413,7 @@ def ommprice(update, context):
     
 
     
-    ommprice = str("Market cap: $" + convmarketcap + "\n" + "\n" + "Omm Price: " + "\n" + "%.3f" % ommusdsconverted + " USDS" + "\n" + ommusdcprice + " IUSDC" + "\n" + ommsicxprice + " sICX" + "\n" "\n" + textpricechange)
+    ommprice = str("Market cap: $" + convmarketcap + "\n" + "\n" + "Omm Price: " + "\n" + "%.3f" % ommusdsconverted + " USDS" + "\n" + ommusdcprice + " IUSDC" + "\n" + ommsicxprice + " sICX" + "\n" "\n")# + textpricechange)
     update.message.reply_text(ommprice)
         #logging interaction#
     logger.info('Omm price Command sent')
@@ -409,11 +425,11 @@ def ommprice(update, context):
 
 def balnprice(update, context):
 
-    statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
-    statsdict = statsapi.json()
-    pricechange = statsdict["tokens"]["BALN"]["price_change"]
-    convpricechange = str("%.4f" % pricechange)
-    textpricechange = "24h change: " + convpricechange + " %"
+    #statsapi = requests.get('https://balanced.sudoblock.io/api/v1/stats/token-stats')
+    #statsdict = statsapi.json()
+    #pricechange = statsdict["tokens"]["BALN"]["price_change"]
+    #convpricechange = str("%.4f" % pricechange)
+    #textpricechange = "24h change: " + convpricechange + " %"
 
     baln_contract = "cxf61cd5a45dc9f91c15aa65831a30a90d59a09619"
 
@@ -459,7 +475,7 @@ def balnprice(update, context):
 
 
 
-    update.message.reply_text("Market Cap: $" + convmarketcap + "\n" + "\n" + "Baln Prices: " + "\n" + balnbnusdresult + " bnUSD" + "\n" + balnsicxresult + " sICX" + "\n" "\n" + textpricechange)
+    update.message.reply_text("Market Cap: $" + convmarketcap + "\n" + "\n" + "Baln Prices: " + "\n" + balnbnusdresult + " bnUSD" + "\n" + balnsicxresult + " sICX" + "\n" "\n")# + textpricechange)
     #logging interaction#
     logger.info('Balnprice Command sent')
     global count
@@ -705,7 +721,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-updater = Updater("INSERT_TG_TOKEN", use_context=True)
+updater = Updater("TELEGRAM API KEY", use_context=True)
     # Get the dispatcher to register handlers
 dp = updater.dispatcher
 
@@ -718,6 +734,7 @@ dp.add_handler(CommandHandler("finprice", finprice))
 dp.add_handler(CommandHandler("metxprice", metxprice))
 dp.add_handler(CommandHandler("clawprice", clawprice))
 dp.add_handler(CommandHandler("frmdprice", frmdprice))
+dp.add_handler(CommandHandler("crownprice", crownprice))
 dp.add_handler(CommandHandler("info", info))
 dp.add_handler(CommandHandler("fullinfo", fullinfo))
 dp.add_handler(CommandHandler("counter", counter))
